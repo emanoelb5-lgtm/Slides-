@@ -32,8 +32,13 @@ jobs:
       - name: Build, lint and unit tests
         run: |
           chmod +x gradlew
+          bash tools/make_update_test_apks.sh
           ./gradlew --no-daemon testDebugUnitTest lintRelease assembleRelease assembleDebug assembleDebugAndroidTest
           python3 tools/apk_payload.py app/build/outputs/apk/release/app-release-unsigned.apk > app/build/payload-sha256.txt
+          mkdir -p ci-apks
+          cp app/build/outputs/apk/debug/app-debug.apk ci-apks/
+          cp app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk ci-apks/
+          cp app/src/androidTest/assets/updates/future.apk ci-apks/future.apk
       - uses: actions/upload-artifact@v4
         with:
           name: slide-release-unsigned
@@ -44,9 +49,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: android-test-packages
-          path: |
-            app/build/outputs/apk/debug/*.apk
-            app/build/outputs/apk/androidTest/debug/*.apk
+          path: ci-apks/
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -85,13 +88,18 @@ jobs:
           script: |
             adb shell settings put system accelerometer_rotation 0
             adb shell settings put system user_rotation 1
-            adb install -r test-apks/debug/app-debug.apk
-            adb install -r test-apks/androidTest/debug/app-debug-androidTest.apk
+            adb install -r test-apks/app-debug.apk
+            adb install -r test-apks/app-debug-androidTest.apk
             mkdir -p emulator-results
             adb shell am instrument -w online.b5solucoes.slide.debug.test/androidx.test.runner.AndroidJUnitRunner | tee emulator-results/instrumentation.txt
             adb pull /sdcard/Android/data/online.b5solucoes.slide.debug/files/slide-tests emulator-results/screenshots || true
             adb logcat -d -s AndroidRuntime:E > emulator-results/crashes.txt
             python3 tools/check_instrumentation.py emulator-results/instrumentation.txt
+            adb shell run-as online.b5solucoes.slide.debug cat shared_prefs/slide.xml > emulator-results/preferences-before.xml
+            adb install -r test-apks/future.apk
+            adb shell run-as online.b5solucoes.slide.debug cat shared_prefs/slide.xml > emulator-results/preferences-after.xml
+            cmp emulator-results/preferences-before.xml emulator-results/preferences-after.xml
+            adb shell dumpsys package online.b5solucoes.slide.debug | grep 'versionCode=10001'
       - uses: actions/upload-artifact@v4
         if: always()
         with:

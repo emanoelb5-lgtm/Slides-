@@ -79,5 +79,16 @@ public class ProjectorTest {
         MainActivity main=(MainActivity)instrument.startActivitySync(new Intent(context,MainActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
         try { instrument.waitForIdleSync(); assertTrue(main.getCurrentFocus() instanceof Button); assertEquals("Abrir apresentação",((Button)main.getCurrentFocus()).getText().toString()); instrument.sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_DOWN); instrument.waitForIdleSync(); assertEquals("Pendrive e pastas",((Button)main.getCurrentFocus()).getText().toString()); screenshot(instrument.getUiAutomation().takeScreenshot(),"home.png"); } finally { instrument.runOnMainSync(main::finish); }
     }
+    @Test public void updatesRequireNewVersionAndExactlyTheInstalledSigner() throws Exception {
+        MainActivity main=(MainActivity)instrument.startActivitySync(new Intent(context,MainActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+        UpdateManager manager=new UpdateManager(main);
+        try {
+            File future=copyAsset("updates/future.apk","future.part"),wrong=copyAsset("updates/wrong.apk","wrong.apk");
+            manager.verify(future,10001);
+            try { manager.verify(wrong,10001); fail("An APK from a different signer was accepted"); } catch(IOException expected) { assertTrue(expected.getMessage().contains("assinatura")); }
+            try { manager.verify(new File(context.getApplicationInfo().sourceDir),BuildConfig.VERSION_CODE); fail("A non-increasing version was accepted"); } catch(IOException expected) { assertTrue(expected.getMessage().contains("atualização válida")); }
+        } finally { manager.close(); instrument.runOnMainSync(main::finish); }
+    }
+    File copyAsset(String asset,String target) throws IOException { File file=temp(target); try(InputStream in=instrument.getContext().getAssets().open(asset); OutputStream out=new FileOutputStream(file)) { byte[] buf=new byte[32768]; int n; while((n=in.read(buf))!=-1) out.write(buf,0,n); } return file; }
     void screenshot(Bitmap bitmap,String name) throws IOException { if(bitmap==null) return; File dir=new File(context.getExternalFilesDir(null),"slide-tests"); dir.mkdirs(); try(OutputStream out=new FileOutputStream(new File(dir,name))) { bitmap.compress(Bitmap.CompressFormat.PNG,100,out); } }
 }
