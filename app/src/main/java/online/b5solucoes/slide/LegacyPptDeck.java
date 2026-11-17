@@ -100,17 +100,18 @@ final class LegacyPptDeck implements Deck {
                     content=sb.toString();
                 }
             }
-            if(anchor==null||anchor.len<16) continue;
+            if(anchor==null||anchor.len<8) continue;
             int a=anchor.start();
             // PPT client anchor stores top, left, right, bottom in master units (1/576 inch).
             RectF r=new RectF(CompoundFile.i32(doc,a+4)/8f,CompoundFile.i32(doc,a)/8f,CompoundFile.i32(doc,a+8)/8f,CompoundFile.i32(doc,a+12)/8f);
+            if(anchor.len==8) r.set((short)CompoundFile.u16(doc,a+2)/8f,(short)CompoundFile.u16(doc,a)/8f,(short)CompoundFile.u16(doc,a+4)/8f,(short)CompoundFile.u16(doc,a+6)/8f);
             if(anchor.type==0xf00f) r.set(CompoundFile.i32(doc,a)/8f,CompoundFile.i32(doc,a+4)/8f,CompoundFile.i32(doc,a+8)/8f,CompoundFile.i32(doc,a+12)/8f);
             if(r.width()<=0||r.height()<=0) continue;
             Paint p=new Paint(Paint.ANTI_ALIAS_FLAG); int shapeType=sp==null?1:sp.options>>>4;
             Integer image=props.get(260);
             if(image!=null&&image>0&&image<=imageTable.size()&&imageTable.get(image-1)!=null) { Render.picture(c,imageTable.get(image-1),r,null); drawn++; }
             else if(props.containsKey(385)) { p.setColor(officeColor(props.get(385))); if(shapeType==3) c.drawOval(r,p); else c.drawRect(r,p); drawn++; }
-            if(!content.trim().isEmpty()) { r.inset(4,2); TextBlock.drawPlain(c,content,r,Math.min(24,Math.max(12,r.height()/3)),props.containsKey(0x181)?Color.BLACK:Color.BLACK,"l","ctr"); drawn++; }
+            if(!content.trim().isEmpty()) { r.inset(4,2); TextBlock.drawPlain(c,content,r,Math.min(24,Math.max(12,r.height()/3)),Color.BLACK,"l","ctr"); drawn++; }
         }
         if(drawn==0) {
             String joined=String.join("\n\n",texts);

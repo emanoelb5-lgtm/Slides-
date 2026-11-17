@@ -3,6 +3,7 @@ package online.b5solucoes.slide;
 import android.app.*;
 import android.content.*;
 import android.content.pm.*;
+import android.content.pm.Signature;
 import android.net.Uri;
 import android.os.*;
 import android.provider.Settings;
