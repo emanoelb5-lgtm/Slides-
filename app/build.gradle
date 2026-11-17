@@ -1,0 +1,32 @@
+plugins { id 'com.android.application' }
+def releaseVersion = new Properties()
+file('../version.properties').withInputStream { releaseVersion.load(it) }
+android {
+    namespace 'online.b5solucoes.slide'
+    compileSdk 35
+    defaultConfig {
+        applicationId 'online.b5solucoes.slide'
+        minSdk 21
+        // Android comum de projetores: acesso legado a pendrives, sem Google/ATV.
+        targetSdk 28
+        versionCode (project.findProperty('versionCodeOverride') ?: releaseVersion.getProperty('versionCode')).toInteger()
+        versionName project.findProperty('versionNameOverride') ?: releaseVersion.getProperty('versionName')
+        testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
+        buildConfigField 'String', 'UPDATE_REPOSITORY', '"emanoelb5-lgtm/Slides-"'
+    }
+    buildFeatures { buildConfig true }
+    compileOptions { coreLibraryDesugaringEnabled true; sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 }
+    buildTypes {
+        release { minifyEnabled false; shrinkResources false }
+        debug { applicationIdSuffix '.debug'; versionNameSuffix '-debug' }
+    }
+    testOptions { unitTests.returnDefaultValues = true }
+    lint { abortOnError true; checkReleaseBuilds true; disable 'ExpiredTargetSdkVersion', 'OldTargetApi' }
+}
+dependencies {
+    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.3'
+    implementation 'com.caverock:androidsvg-aar:1.4'
+    testImplementation 'junit:junit:4.13.2'
+    androidTestImplementation 'androidx.test.ext:junit:1.2.1'
+    androidTestImplementation 'androidx.test:runner:1.6.2'
+}

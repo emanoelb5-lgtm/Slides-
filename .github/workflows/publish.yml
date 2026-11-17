@@ -1,0 +1,31 @@
+name: Publish verified signed APK
+
+on:
+  push:
+    branches: [main]
+    paths: ['distribution/**']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: read
+
+concurrency:
+  group: publish-slide
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: android-actions/setup-android@v3
+      - name: Verify identity, build origin and publish GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 tools/publish_release.py
