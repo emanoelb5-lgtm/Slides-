@@ -54,7 +54,7 @@ public class ProjectorTest {
     }
     @Test public void legacyPowerPointGeneratedByApachePoiOpens() throws Exception {
         File f=temp("legacy.ppt"); try(InputStream in=instrument.getContext().getAssets().open("legacy.ppt"); OutputStream out=new FileOutputStream(f)) { byte[] buf=new byte[8192]; int n; while((n=in.read(buf))!=-1) out.write(buf,0,n); }
-        try(Deck d=Deck.open(f)) { assertEquals(2,d.size()); Bitmap b=d.render(0,960,720); assertNotNull(b); assertTrue(b.getWidth()>0); screenshot(b,"legacy-ppt-render.png"); }
+        try(Deck d=Deck.open(f)) { assertEquals(2,d.size()); Bitmap b=d.render(0,960,720); assertNotNull(b); assertColor(Color.rgb(139,233,190),b.getPixel(10,10)); screenshot(b,"legacy-ppt-render.png"); }
     }
     @Test public void remoteControlAdvancesPausesAndReturnsWithoutTouch() throws Exception {
         Intent intent=new Intent(context,PlayerActivity.class).putExtra("demo",true).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);

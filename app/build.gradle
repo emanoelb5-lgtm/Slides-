@@ -1,6 +1,8 @@
 plugins { id 'com.android.application' }
 def releaseVersion = new Properties()
 file('../version.properties').withInputStream { releaseVersion.load(it) }
+def releaseCode = (project.findProperty('versionCodeOverride') ?: releaseVersion.getProperty('versionCode')).toString().toInteger()
+def releaseName = (project.findProperty('versionNameOverride') ?: releaseVersion.getProperty('versionName')).toString()
 android {
     namespace 'online.b5solucoes.slide'
     compileSdk 35
@@ -9,8 +11,8 @@ android {
         minSdk 21
         // Android comum de projetores: acesso legado a pendrives, sem Google/ATV.
         targetSdk 28
-        versionCode (project.findProperty('versionCodeOverride') ?: releaseVersion.getProperty('versionCode')).toInteger()
-        versionName project.findProperty('versionNameOverride') ?: releaseVersion.getProperty('versionName')
+        versionCode = releaseCode
+        versionName = releaseName
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
         buildConfigField 'String', 'UPDATE_REPOSITORY', '"emanoelb5-lgtm/Slides-"'
     }

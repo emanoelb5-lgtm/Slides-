@@ -15,7 +15,7 @@ public final class PlayerActivity extends Activity {
     final ExecutorService worker=Executors.newSingleThreadExecutor(); final Handler handler=new Handler(Looper.getMainLooper());
     final LruCache<Integer,Bitmap> cache=new LruCache<Integer,Bitmap>(16*1024) { protected int sizeOf(Integer key,Bitmap value) { return value.getByteCount()/1024; } };
     LibraryStore store; LibraryStore.Item item; Deck deck; ImageView image; TextView hud; FrameLayout root; View black;
-    volatile boolean closed; volatile int generation; int page,total; boolean auto,paused,menuOpen,blackout; int seconds=15; AlertDialog menu;
+    volatile boolean closed; volatile int generation,previewGeneration; int page,total; boolean auto,paused,menuOpen,blackout; int seconds=15; AlertDialog menu;
     String digits="";
     final Runnable advance=()->{ if(auto&&!paused&&!menuOpen&&!blackout&&deck!=null) { if(page+1<total) show(page+1); else if(store.prefs.getBoolean("loop",false)) show(0); else { auto=false; message("Apresentação concluída"); } } };
     final Runnable hideHud=()->{ if(hud!=null) hud.setVisibility(View.GONE); };
@@ -77,13 +77,14 @@ public final class PlayerActivity extends Activity {
     }
     void jumpDialog() {
         menuOpen=true; handler.removeCallbacks(advance);
-        NumberPicker picker=new NumberPicker(this); picker.setMinValue(1); picker.setMaxValue(Math.max(1,total)); picker.setValue(page+1); picker.setWrapSelectorWheel(false); picker.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
+        NumberPicker picker=new NumberPicker(this); picker.setMinValue(1); picker.setMaxValue(Math.max(1,total)); picker.setValue(page+1); picker.setWrapSelectorWheel(false); picker.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS); picker.setFocusable(true);
         AlertDialog d=new AlertDialog.Builder(this).setTitle("Escolha com ↑ e ↓").setView(picker).setPositiveButton("Abrir slide",(x,n)->show(picker.getValue()-1)).setNegativeButton("Cancelar",null).create();
         d.setOnDismissListener(x->{ menuOpen=false; schedule(); }); d.show(); picker.requestFocus();
     }
     void overview() { overview(page); }
     void overview(int selected) {
         menuOpen=true; handler.removeCallbacks(advance);
+        final int previewToken=++previewGeneration;
         LinearLayout layout=Ui.vertical(this); layout.setPadding(Ui.dp(this,12),Ui.dp(this,8),Ui.dp(this,12),Ui.dp(this,8));
         TextView caption=Ui.text(this,"Selecione com as setas e pressione OK",14,Ui.MUTED); layout.addView(caption);
         GridView grid=new GridView(this); grid.setNumColumns(4); grid.setVerticalSpacing(Ui.dp(this,8)); grid.setHorizontalSpacing(Ui.dp(this,8)); grid.setSelector(Ui.focus(this));
@@ -94,13 +95,13 @@ public final class PlayerActivity extends Activity {
                 int number=at+batchStart; LinearLayout tile=Ui.vertical(PlayerActivity.this); tile.setPadding(8,5,8,5); tile.setBackground(Ui.rounded(PlayerActivity.this,Ui.PANEL,number==page?Ui.ACCENT:0xff324055));
                 ImageView thumb=new ImageView(PlayerActivity.this); thumb.setScaleType(ImageView.ScaleType.FIT_CENTER); tile.addView(thumb,new LinearLayout.LayoutParams(-1,Ui.dp(PlayerActivity.this,62)));
                 TextView label=Ui.text(PlayerActivity.this,"Slide "+(number+1),13,Ui.TEXT); label.setGravity(Gravity.CENTER); tile.addView(label);
-                worker.execute(()->{ if(closed) return; try { Bitmap t=deck.render(number,240,140); runOnUiThread(()->{ if(!closed&&menuOpen) thumb.setImageBitmap(t); }); } catch(Exception|OutOfMemoryError ignored) {} });
+                worker.execute(()->{ if(closed||previewToken!=previewGeneration) return; try { Bitmap t=deck.render(number,240,140); runOnUiThread(()->{ if(!closed&&previewToken==previewGeneration) thumb.setImageBitmap(t); }); } catch(Exception|OutOfMemoryError ignored) {} });
                 return tile;
             }
         }; grid.setAdapter(adapter); layout.addView(grid,new LinearLayout.LayoutParams(-1,Ui.dp(this,280)));
         AlertDialog d=new AlertDialog.Builder(this).setTitle("Visão geral · "+(batchStart+1)+"–"+batchEnd+" / "+total).setView(layout).setNegativeButton("Voltar",null).setNeutralButton("12 anteriores",null).setPositiveButton("12 seguintes",null).create();
         grid.setOnItemClickListener((p,v,n,id)->{ d.dismiss(); show(batchStart+n); });
-        d.setOnDismissListener(x->{ menuOpen=false; schedule(); }); d.show(); grid.requestFocus(); grid.setSelection(selected-batchStart);
+        d.setOnDismissListener(x->{ previewGeneration++; menuOpen=false; schedule(); }); d.show(); grid.requestFocus(); grid.setSelection(selected-batchStart);
         d.getButton(AlertDialog.BUTTON_NEUTRAL).setEnabled(batchStart>0); d.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(batchEnd<total);
         d.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener(v->{ d.dismiss(); overview(Math.max(0,batchStart-12)); });
         d.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v->{ d.dismiss(); overview(batchEnd); });
