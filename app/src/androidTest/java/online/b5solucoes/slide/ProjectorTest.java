@@ -28,7 +28,8 @@ public class ProjectorTest {
     void assertColor(int color,int actual) { assertEquals(Color.red(color),Color.red(actual),5); assertEquals(Color.green(color),Color.green(actual),5); assertEquals(Color.blue(color),Color.blue(actual),5); }
     @Test public void pdfRendersOfflineAndKeepsPageOrder() throws Exception {
         File f=temp("native.pdf");
-        try(PdfDocument pdf=new PdfDocument()) { for(int i=0;i<3;i++) { PdfDocument.Page page=pdf.startPage(new PdfDocument.PageInfo.Builder(200,100,i+1).create()); page.getCanvas().drawColor(new int[]{Color.RED,Color.GREEN,Color.BLUE}[i]); pdf.finishPage(page); } try(OutputStream out=new FileOutputStream(f)) { pdf.writeTo(out); } }
+        PdfDocument pdf=new PdfDocument();
+        try { for(int i=0;i<3;i++) { PdfDocument.Page page=pdf.startPage(new PdfDocument.PageInfo.Builder(200,100,i+1).create()); page.getCanvas().drawColor(new int[]{Color.RED,Color.GREEN,Color.BLUE}[i]); pdf.finishPage(page); } try(OutputStream out=new FileOutputStream(f)) { pdf.writeTo(out); } } finally { pdf.close(); }
         try(Deck d=Deck.open(f)) { assertEquals(3,d.size()); Bitmap b=d.render(1,800,600); assertEquals(2f,(float)b.getWidth()/b.getHeight(),.01f); assertColor(Color.GREEN,b.getPixel(400,200)); screenshot(b,"pdf-render.png"); }
     }
     @Test public void powerPointUsesSlideRelationshipsAndEmbeddedImages() throws Exception {

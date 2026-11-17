@@ -28,11 +28,11 @@ public final class MainActivity extends Activity {
         browsing=null; root=Ui.vertical(this); root.setBackgroundColor(Ui.BG);
         int safe=Ui.dp(this,20+store.prefs.getInt("margin",3)*2); root.setPadding(safe,Ui.dp(this,16),safe,Ui.dp(this,14));
         LinearLayout header=new LinearLayout(this); header.setGravity(Gravity.CENTER_VERTICAL);
-        TextView brand=Ui.text(this,"▶  SLIDE",24,Ui.ACCENT); brand.setTypeface(null,1); header.addView(brand,new LinearLayout.LayoutParams(0,-2,1));
+        TextView brand=Ui.text(this,"▶  SLIDE",24,Ui.ACCENT); brand.setTypeface(null,android.graphics.Typeface.BOLD); header.addView(brand,new LinearLayout.LayoutParams(0,-2,1));
         TextView version=Ui.text(this,"TD98 PRO  ·  v"+BuildConfig.VERSION_NAME,13,Ui.MUTED); header.addView(version); root.addView(header); Ui.gap(root,12);
         LinearLayout body=new LinearLayout(this); body.setGravity(Gravity.CENTER_VERTICAL); root.addView(body,new LinearLayout.LayoutParams(-1,0,1));
         LinearLayout intro=Ui.vertical(this); intro.setPadding(0,0,Ui.dp(this,26),0); body.addView(intro,new LinearLayout.LayoutParams(0,-2,.9f));
-        TextView headline=Ui.text(this,"Sua aula,\nna tela grande.",32,Ui.TEXT); headline.setTypeface(null,1); intro.addView(headline); Ui.gap(intro,12);
+        TextView headline=Ui.text(this,"Sua aula,\nna tela grande.",32,Ui.TEXT); headline.setTypeface(null,android.graphics.Typeface.BOLD); intro.addView(headline); Ui.gap(intro,12);
         intro.addView(Ui.text(this,"PDF, PowerPoint, OpenDocument\ne imagens direto do pendrive.",16,Ui.MUTED)); Ui.gap(intro,18);
         intro.addView(Ui.text(this,"OFFLINE  •  CONTROLE REMOTO",12,Ui.ACCENT));
         LinearLayout actions=Ui.vertical(this); body.addView(actions,new LinearLayout.LayoutParams(0,-2,1.1f));
