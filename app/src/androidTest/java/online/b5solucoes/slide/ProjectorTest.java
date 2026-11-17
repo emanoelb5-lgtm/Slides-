@@ -61,16 +61,19 @@ public class ProjectorTest {
         Intent intent=new Intent(context,PlayerActivity.class).putExtra("demo",true).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         PlayerActivity player=(PlayerActivity)instrument.startActivitySync(intent);
         try {
-            instrument.waitForIdleSync(); assertEquals(0,player.page);
+            awaitUi(()->player.hasWindowFocus()&&player.image.getDrawable()!=null,"The presentation did not acquire an input window"); assertEquals(0,player.page);
             instrument.sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_RIGHT); instrument.waitForIdleSync(); assertEquals(1,player.page);
             instrument.sendKeyDownUpSync(KeyEvent.KEYCODE_CHANNEL_UP); instrument.waitForIdleSync(); assertEquals(2,player.page);
             instrument.sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_LEFT); instrument.waitForIdleSync(); assertEquals(1,player.page);
             instrument.sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_CENTER); instrument.waitForIdleSync(); assertTrue(player.menuOpen);
+            awaitUi(()->player.menu!=null&&player.menu.getWindow().getDecorView().hasWindowFocus(),"Presentation options did not receive focus");
             instrument.sendKeyDownUpSync(KeyEvent.KEYCODE_BACK); instrument.waitForIdleSync(); assertFalse(player.menuOpen);
+            awaitUi(player::hasWindowFocus,"Input focus did not return to the presentation");
             instrument.sendKeyDownUpSync(KeyEvent.KEYCODE_B); instrument.waitForIdleSync(); assertTrue(player.blackout);
             instrument.sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_RIGHT); instrument.waitForIdleSync(); assertFalse(player.blackout); assertEquals(1,player.page);
             screenshot(instrument.getUiAutomation().takeScreenshot(),"remote-player.png");
-        } finally { instrument.runOnMainSync(player::finish); }
+        } catch(AssertionError error) { screenshot(instrument.getUiAutomation().takeScreenshot(),"remote-failure.png"); throw error; }
+        finally { instrument.runOnMainSync(player::finish); }
     }
     @Test public void importedFilesAndPositionSurviveNewStoreInstance() throws Exception {
         LibraryStore s=new LibraryStore(context); LibraryStore.Item item=s.copy(new ByteArrayInputStream(xml("Primeiro\fSegundo")),"offline.txt"); item.page=1; item.count=2; s.touch(item);
@@ -91,5 +94,11 @@ public class ProjectorTest {
         } finally { manager.close(); instrument.runOnMainSync(main::finish); }
     }
     File copyAsset(String asset,String target) throws IOException { File file=temp(target); try(InputStream in=instrument.getContext().getAssets().open(asset); OutputStream out=new FileOutputStream(file)) { byte[] buf=new byte[32768]; int n; while((n=in.read(buf))!=-1) out.write(buf,0,n); } return file; }
+    interface UiCondition { boolean ready(); }
+    void awaitUi(UiCondition condition,String message) {
+        long end=SystemClock.uptimeMillis()+5000;
+        while(SystemClock.uptimeMillis()<end) { boolean[] value={false}; instrument.runOnMainSync(()->value[0]=condition.ready()); if(value[0]) return; SystemClock.sleep(25); }
+        fail(message);
+    }
     void screenshot(Bitmap bitmap,String name) throws IOException { if(bitmap==null) return; File dir=new File(context.getExternalFilesDir(null),"slide-tests"); dir.mkdirs(); try(OutputStream out=new FileOutputStream(new File(dir,name))) { bitmap.compress(Bitmap.CompressFormat.PNG,100,out); } }
 }

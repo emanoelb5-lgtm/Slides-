@@ -29,7 +29,9 @@ public final class PlayerActivity extends Activity {
         hud=Ui.text(this,"Preparando apresentação…",16,Ui.TEXT); hud.setBackgroundColor(0xe6142030); hud.setPadding(Ui.dp(this,24),Ui.dp(this,10),Ui.dp(this,24),Ui.dp(this,10));
         FrameLayout.LayoutParams hp=new FrameLayout.LayoutParams(-2,-2,Gravity.BOTTOM|Gravity.CENTER_HORIZONTAL); hp.bottomMargin=Ui.dp(this,18)+inset; root.addView(hud,hp);
         black=new View(this); black.setBackgroundColor(Color.BLACK); black.setVisibility(View.GONE); root.addView(black,new FrameLayout.LayoutParams(-1,-1));
-        root.setOnClickListener(v->{ if(blackout) toggleBlack(); else controls(); }); setContentView(root);
+        root.setOnClickListener(v->{ if(blackout) toggleBlack(); else controls(); });
+        root.setFocusable(true); root.setFocusableInTouchMode(true); root.setDescendantFocusability(ViewGroup.FOCUS_BLOCK_DESCENDANTS);
+        setContentView(root); root.requestFocus();
         if(getIntent().getBooleanExtra("demo",false)) { deck=new DemoDeck(); total=deck.size(); show(state==null?0:state.getInt("page",0)); return; }
         String file=getIntent().getStringExtra("file"); item=store.find(file==null?"":file);
         if(item==null) { fail(new IOException("Apresentação não encontrada. Abra o arquivo novamente.")); return; }
