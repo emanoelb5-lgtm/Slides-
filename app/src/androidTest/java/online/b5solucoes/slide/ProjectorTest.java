@@ -90,8 +90,8 @@ public class ProjectorTest {
         UpdateManager manager=new UpdateManager(main);
         try {
             File future=copyAsset("updates/future.apk","future.part"),wrong=copyAsset("updates/wrong.apk","wrong.apk");
-            manager.verify(future,10001);
-            try { manager.verify(wrong,10001); fail("An APK from a different signer was accepted"); } catch(IOException expected) { assertTrue(expected.getMessage().contains("assinatura")); }
+            manager.verify(future,BuildConfig.VERSION_CODE+1);
+            try { manager.verify(wrong,BuildConfig.VERSION_CODE+1); fail("An APK from a different signer was accepted"); } catch(IOException expected) { assertTrue(expected.getMessage().contains("assinatura")); }
             try { manager.verify(new File(context.getApplicationInfo().sourceDir),BuildConfig.VERSION_CODE); fail("A non-increasing version was accepted"); } catch(IOException expected) { assertTrue(expected.getMessage().contains("atualização válida")); }
         } finally { manager.close(); instrument.runOnMainSync(main::finish); }
     }
