@@ -9,7 +9,8 @@ token = os.environ['GH_TOKEN']
 info = json.loads((root / 'distribution/release.json').read_text())
 apk = root / 'distribution/Slide-TD98.apk'
 sdk = pathlib.Path(os.environ.get('ANDROID_HOME', os.environ.get('ANDROID_SDK_ROOT', '')))
-build_tools = sorted((sdk / 'build-tools').iterdir(), key=lambda p: tuple(int(x) if x.isdigit() else 0 for x in p.name.split('.')))[-1]
+build_tools = sdk / 'build-tools' / '35.0.0'
+assert (build_tools / 'apksigner').is_file(), 'Android Build-Tools 35.0.0 must be installed'
 report = subprocess.check_output([str(build_tools / 'apksigner'), 'verify', '--verbose', '--print-certs', str(apk)], text=True)
 fingerprint = re.search(r'Signer #1 certificate SHA-256 digest: ([0-9a-fA-F]+)', report).group(1).lower()
 assert fingerprint == (root / 'signing/certificate.sha256').read_text().strip().lower(), 'Unexpected APK signing key'

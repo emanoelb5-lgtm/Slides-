@@ -13,7 +13,9 @@ args = parser.parse_args()
 root = pathlib.Path(__file__).resolve().parents[1]
 credentials = json.loads((args.backup / 'credentials.json').read_text())
 out = root / 'distribution/Slide-TD98.apk'
-tools = sorted((args.sdk / 'build-tools').iterdir())[-1]
+tools = args.sdk / 'build-tools' / '35.0.0'
+if not (tools / 'apksigner').is_file():
+    raise SystemExit('Install Android SDK Build-Tools 35.0.0 before signing.')
 aligned = out.with_suffix('.aligned.apk')
 subprocess.run([str(tools / 'zipalign'), '-f', '-p', '4', str(args.apk), str(aligned)], check=True)
 env = dict(os.environ, SLIDE_STORE_PASSWORD=credentials['storePassword'], SLIDE_KEY_PASSWORD=credentials['keyPassword'])
