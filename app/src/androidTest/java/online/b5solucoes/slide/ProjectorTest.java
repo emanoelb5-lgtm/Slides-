@@ -78,6 +78,8 @@ public class ProjectorTest {
     @Test public void importedFilesAndPositionSurviveNewStoreInstance() throws Exception {
         LibraryStore s=new LibraryStore(context); LibraryStore.Item item=s.copy(new ByteArrayInputStream(xml("Primeiro\fSegundo")),"offline.txt"); item.page=1; item.count=2; s.touch(item);
         LibraryStore other=new LibraryStore(context); assertEquals(1,other.find(item.file).page); assertEquals(2,other.find(item.file).count); assertTrue(new File(other.dir,item.file).isFile());
+        assertTrue(other.prefs.edit().putString("upgrade_marker","slide-position-and-import-v1").commit());
+        assertTrue(new File(context.getApplicationInfo().dataDir,"shared_prefs/slide.xml").isFile());
     }
     @Test public void homeHasRemoteFocusableActions() throws Exception {
         MainActivity main=(MainActivity)instrument.startActivitySync(new Intent(context,MainActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));

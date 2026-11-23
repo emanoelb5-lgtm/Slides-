@@ -95,11 +95,7 @@ jobs:
             adb pull /sdcard/Android/data/online.b5solucoes.slide.debug/files/slide-tests emulator-results/screenshots || true
             adb logcat -d -s AndroidRuntime:E > emulator-results/crashes.txt
             python3 tools/check_instrumentation.py emulator-results/instrumentation.txt
-            adb shell run-as online.b5solucoes.slide.debug cat shared_prefs/slide.xml > emulator-results/preferences-before.xml
-            adb install -r test-apks/future.apk
-            adb shell run-as online.b5solucoes.slide.debug cat shared_prefs/slide.xml > emulator-results/preferences-after.xml
-            cmp emulator-results/preferences-before.xml emulator-results/preferences-after.xml
-            adb shell dumpsys package online.b5solucoes.slide.debug | grep 'versionCode=10001'
+            bash tools/check_upgrade.sh
       - uses: actions/upload-artifact@v4
         if: always()
         with:
