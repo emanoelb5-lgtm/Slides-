@@ -1,0 +1,10 @@
+{
+  "applicationId": "online.b5solucoes.slide",
+  "versionCode": 10000,
+  "versionName": "1.0.0",
+  "sha256": "e9f8a3c32a29a5734b5f25be59b4d48a5c73af1a2ba7175f2ec1c04ab527f833",
+  "size": 168775,
+  "buildRun": 45197883092,
+  "sourceCommit": "160651e448cc67e154aadf094ab8cffa5db5c52b",
+  "notes": "Apresentações offline no TD98 Pro sem ATV. Navegação por controle remoto, pendrive, recentes com retomada, tela preta, miniaturas, modo automático e atualizações pelo GitHub. Leitura estática de PowerPoint/ODP; recursos complexos podem diferir. PDF e imagens são recomendados para fidelidade visual."
+}
