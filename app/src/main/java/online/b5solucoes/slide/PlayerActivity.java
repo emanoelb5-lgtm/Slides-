@@ -94,7 +94,7 @@ public final class PlayerActivity extends Activity {
         android.widget.BaseAdapter adapter=new android.widget.BaseAdapter() {
             public int getCount() { return batchEnd-batchStart; } public Object getItem(int p) { return p+batchStart; } public long getItemId(int p) { return p+batchStart; }
             public View getView(int at,View reuse,ViewGroup parent) {
-                int number=at+batchStart; LinearLayout tile=Ui.vertical(PlayerActivity.this); tile.setPadding(8,5,8,5); tile.setBackground(Ui.rounded(PlayerActivity.this,Ui.PANEL,number==page?Ui.ACCENT:0xff324055));
+                int number=at+batchStart; LinearLayout tile=Ui.vertical(PlayerActivity.this); tile.setPadding(8,5,8,5); tile.setBackground(Ui.rounded(PlayerActivity.this,Color.TRANSPARENT,number==page?Ui.ACCENT:0xff324055));
                 ImageView thumb=new ImageView(PlayerActivity.this); thumb.setScaleType(ImageView.ScaleType.FIT_CENTER); tile.addView(thumb,new LinearLayout.LayoutParams(-1,Ui.dp(PlayerActivity.this,62)));
                 TextView label=Ui.text(PlayerActivity.this,"Slide "+(number+1),13,Ui.TEXT); label.setGravity(Gravity.CENTER); tile.addView(label);
                 worker.execute(()->{ if(closed||previewToken!=previewGeneration) return; try { Bitmap t=deck.render(number,240,140); runOnUiThread(()->{ if(!closed&&previewToken==previewGeneration) thumb.setImageBitmap(t); }); } catch(Exception|OutOfMemoryError ignored) {} });
