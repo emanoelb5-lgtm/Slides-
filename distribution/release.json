@@ -7,5 +7,6 @@
   "buildRun": 45197883092,
   "sourceCommit": "160651e448cc67e154aadf094ab8cffa5db5c52b",
   "notes": "Apresentações offline no TD98 Pro sem ATV. Navegação por controle remoto, pendrive, recentes com retomada, tela preta, miniaturas, modo automático e atualizações pelo GitHub. Leitura estática de PowerPoint/ODP; recursos complexos podem diferir. PDF e imagens são recomendados para fidelidade visual.",
-  "publicationToolsVersion": "35.0.0"
+  "publicationToolsVersion": "35.0.0",
+  "publicationRedirectPolicy": "strip-cross-origin-authorization"
 }

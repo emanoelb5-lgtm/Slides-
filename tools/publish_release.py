@@ -21,10 +21,22 @@ assert int(package.group(2)) == info['versionCode'] and package.group(3) == info
 assert hashlib.sha256(apk.read_bytes()).hexdigest() == info['sha256']
 assert apk.stat().st_size == info['size']
 
+class GitHubRedirect(urllib.request.HTTPRedirectHandler):
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        if urllib.parse.urlsplit(newurl).scheme != 'https':
+            raise ValueError('Release downloads must remain on HTTPS')
+        redirected = super().redirect_request(req, fp, code, msg, headers, newurl)
+        if redirected is not None and urllib.parse.urlsplit(req.full_url).netloc != urllib.parse.urlsplit(newurl).netloc:
+            # Artifact storage uses its signed URL, not the GitHub bearer token.
+            redirected.remove_header('Authorization')
+        return redirected
+
+http = urllib.request.build_opener(GitHubRedirect())
+
 def request(url, data=None, method='GET', content_type='application/json'):
     body = None if data is None else (data if isinstance(data, bytes) else json.dumps(data).encode())
     req = urllib.request.Request(url, data=body, method=method, headers={'Authorization': 'Bearer ' + token, 'Accept': 'application/vnd.github+json', 'Content-Type': content_type, 'X-GitHub-Api-Version': '2022-11-28', 'User-Agent': 'Slide-TD98-release'})
-    with urllib.request.urlopen(req, timeout=120) as response:
+    with http.open(req, timeout=120) as response:
         raw = response.read()
         return raw if content_type == 'application/zip' else json.loads(raw)
 
