@@ -100,7 +100,9 @@ public final class PlayerActivity extends Activity {
                 worker.execute(()->{ if(closed||previewToken!=previewGeneration) return; try { Bitmap t=deck.render(number,240,140); runOnUiThread(()->{ if(!closed&&previewToken==previewGeneration) thumb.setImageBitmap(t); }); } catch(Exception|OutOfMemoryError ignored) {} });
                 return tile;
             }
-        }; grid.setAdapter(adapter); layout.addView(grid,new LinearLayout.LayoutParams(-1,Ui.dp(this,280)));
+        }; grid.setAdapter(adapter);
+        int screenDp=Math.round(getResources().getDisplayMetrics().heightPixels/getResources().getDisplayMetrics().density);
+        layout.addView(grid,new LinearLayout.LayoutParams(-1,Ui.dp(this,Math.max(90,Math.min(280,screenDp-160)))));
         AlertDialog d=new AlertDialog.Builder(this).setTitle("Visão geral · "+(batchStart+1)+"–"+batchEnd+" / "+total).setView(layout).setNegativeButton("Voltar",null).setNeutralButton("12 anteriores",null).setPositiveButton("12 seguintes",null).create();
         grid.setOnItemClickListener((p,v,n,id)->{ d.dismiss(); show(batchStart+n); });
         d.setOnDismissListener(x->{ previewGeneration++; menuOpen=false; schedule(); }); d.show(); grid.requestFocus(); grid.setSelection(selected-batchStart);

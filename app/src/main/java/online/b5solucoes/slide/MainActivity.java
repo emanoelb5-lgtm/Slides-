@@ -30,7 +30,7 @@ public final class MainActivity extends Activity {
         LinearLayout header=new LinearLayout(this); header.setGravity(Gravity.CENTER_VERTICAL);
         TextView brand=Ui.text(this,"▶  SLIDE",24,Ui.ACCENT); brand.setTypeface(null,android.graphics.Typeface.BOLD); header.addView(brand,new LinearLayout.LayoutParams(0,-2,1));
         TextView version=Ui.text(this,"TD98 PRO  ·  v"+BuildConfig.VERSION_NAME,13,Ui.MUTED); header.addView(version); root.addView(header); Ui.gap(root,12);
-        LinearLayout body=new LinearLayout(this); body.setGravity(Gravity.CENTER_VERTICAL); root.addView(body,new LinearLayout.LayoutParams(-1,0,1));
+        LinearLayout body=new LinearLayout(this); body.setGravity(Gravity.CENTER_VERTICAL); body.setMinimumHeight(Ui.dp(this,248)); root.addView(body,new LinearLayout.LayoutParams(-1,0,1));
         LinearLayout intro=Ui.vertical(this); intro.setPadding(0,0,Ui.dp(this,26),0); body.addView(intro,new LinearLayout.LayoutParams(0,-2,.9f));
         TextView headline=Ui.text(this,"Sua aula,\nna tela grande.",32,Ui.TEXT); headline.setTypeface(null,android.graphics.Typeface.BOLD); intro.addView(headline); Ui.gap(intro,12);
         intro.addView(Ui.text(this,"PDF, PowerPoint, OpenDocument\ne imagens direto do pendrive.",16,Ui.MUTED)); Ui.gap(intro,18);
@@ -45,7 +45,8 @@ public final class MainActivity extends Activity {
         bottom.addView(updateButton,new LinearLayout.LayoutParams(0,Ui.dp(this,56),1)); LinearLayout.LayoutParams opts=new LinearLayout.LayoutParams(0,Ui.dp(this,56),.7f); opts.leftMargin=Ui.dp(this,8); bottom.addView(settings,opts); actions.addView(bottom);
         List<LibraryStore.Item> recentItems=store.items();
         if(!recentItems.isEmpty()) { LibraryStore.Item first=recentItems.get(0); Ui.gap(root,8); Button resume=Ui.button(this,"Continuar: "+first.name+"  ·  slide "+(first.page+1),()->play(first)); resume.setTextSize(14); resume.setSingleLine(); resume.setEllipsize(android.text.TextUtils.TruncateAt.MIDDLE); root.addView(resume,new LinearLayout.LayoutParams(-1,Ui.dp(this,48))); }
-        status=Ui.text(this,"Setas: navegar    OK: selecionar    Voltar: retornar",12,Ui.MUTED); status.setPadding(0,Ui.dp(this,10),0,0); root.addView(status); setContentView(root); open.requestFocus();
+        status=Ui.text(this,"Setas: navegar    OK: selecionar    Voltar: retornar",12,Ui.MUTED); status.setPadding(0,Ui.dp(this,10),0,0); root.addView(status);
+        ScrollView scroll=new ScrollView(this); scroll.setFillViewport(true); scroll.addView(root,new ScrollView.LayoutParams(-1,-2)); setContentView(scroll); open.requestFocus();
     }
     void addAction(LinearLayout parent,Button button) { parent.addView(button,new LinearLayout.LayoutParams(-1,Ui.dp(this,56))); Ui.gap(parent,8); }
     void picker() {

@@ -96,6 +96,10 @@ jobs:
             adb pull /sdcard/Android/data/online.b5solucoes.slide.debug/files/slide-tests emulator-results/screenshots || true
             adb logcat -d -s AndroidRuntime:E > emulator-results/crashes.txt
             python3 tools/check_instrumentation.py emulator-results/instrumentation.txt
+            adb shell wm size 800x480
+            adb shell wm density 240
+            adb shell am instrument -w -e class 'online.b5solucoes.slide.ProjectorTest#homeHasRemoteFocusableActions,online.b5solucoes.slide.ProjectorTest#remoteControlAdvancesPausesAndReturnsWithoutTouch' online.b5solucoes.slide.debug.test/androidx.test.runner.AndroidJUnitRunner | tee emulator-results/compact-screen.txt
+            python3 tools/check_instrumentation.py emulator-results/compact-screen.txt
             bash tools/check_upgrade.sh
       - uses: actions/upload-artifact@v4
         if: always()

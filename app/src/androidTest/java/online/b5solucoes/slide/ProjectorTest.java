@@ -83,7 +83,11 @@ public class ProjectorTest {
     }
     @Test public void homeHasRemoteFocusableActions() throws Exception {
         MainActivity main=(MainActivity)instrument.startActivitySync(new Intent(context,MainActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
-        try { instrument.waitForIdleSync(); assertTrue(main.getCurrentFocus() instanceof Button); assertEquals("Abrir apresentação",((Button)main.getCurrentFocus()).getText().toString()); instrument.sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_DOWN); instrument.waitForIdleSync(); assertEquals("Pendrive e pastas",((Button)main.getCurrentFocus()).getText().toString()); screenshot(instrument.getUiAutomation().takeScreenshot(),"home.png"); } finally { instrument.runOnMainSync(main::finish); }
+        try { instrument.waitForIdleSync(); assertTrue(main.getCurrentFocus() instanceof Button); assertEquals("Abrir apresentação",((Button)main.getCurrentFocus()).getText().toString()); instrument.sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_DOWN); instrument.waitForIdleSync(); assertEquals("Pendrive e pastas",((Button)main.getCurrentFocus()).getText().toString());
+            instrument.sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_DOWN); instrument.sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_DOWN); instrument.sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_RIGHT); instrument.waitForIdleSync();
+            assertEquals("Opções",((Button)main.getCurrentFocus()).getText().toString());
+            awaitUi(()->{ View focused=main.getCurrentFocus(); Rect visible=new Rect(); return focused.getGlobalVisibleRect(visible)&&visible.height()>=focused.getHeight()-1; },"The last action was clipped on the projector screen");
+            screenshot(instrument.getUiAutomation().takeScreenshot(),"home.png"); } finally { instrument.runOnMainSync(main::finish); }
     }
     @Test public void updatesRequireNewVersionAndExactlyTheInstalledSigner() throws Exception {
         MainActivity main=(MainActivity)instrument.startActivitySync(new Intent(context,MainActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
